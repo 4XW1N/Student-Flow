@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#F4EDDF" />
+<title>StudentFlow — Demo</title>
+<style>
+/* ============ THEME TOKENS (Direction C) ============ */
+html[data-theme="light"]{
+  color-scheme:light;
+  --bg:#F4EDDF; --bg-2:#EFE6D5; --card:#FFFCF6; --border:#E6D9C2;
+  --fg:#2B1A16; --muted:#7A6A5B;
+  --primary:#800020; --on-primary:#FFFFFF; --link:#800020;
+  --chip-bg:#EFE6D5; --chip-fg:#5F5044;
+  --danger:#B91C1C; --success:#15803D;
+  --overlay:rgba(43,26,22,.45);
+  --shadow:0 10px 30px -18px rgba(128,0,32,.45);
+}
+html[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#17100A; --bg-2:#1E150D; --card:#26180F; --border:#3D2A1C;
+  --fg:#FFFFFF; --muted:#B9AFA3;
+  --primary:#C0394F; --on-primary:#FFFFFF; --link:#E3B04B;
+  --chip-bg:#33241A; --chip-fg:#D6CCBF;
+  --danger:#F87171; --success:#4ADE80;
+  --overlay:rgba(0,0,0,.6);
+  --shadow:0 10px 30px -18px rgba(0,0,0,.8);
+}
+/* ============ BASE ============ */
+*{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+html,body{ height:100%; }
+body{
+  font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  background:var(--bg); color:var(--fg);
+  transition:background .25s ease,color .25s ease;
+}
+h1,h2,h3,.serif{ font-family:'Playfair Display',Georgia,'Times New Roman',serif; }
+button{ font:inherit; color:inherit; background:none; border:none; cursor:pointer; }
+input,select,textarea{ font:inherit; color:var(--fg); }
+a{ color:var(--link); }
+:focus-visible{ outline:2px solid var(--link); outline-offset:2px; border-radius:6px; }
+@media (prefers-reduced-motion:reduce){ *{ transition:none !important; animation:none !important; } }
+::-webkit-scrollbar{ width:0; height:0; }
+
+/* ============ COMPONENTS ============ */
+.card{ background:var(--card); border:1px solid var(--border); border-radius:20px; }
+.btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  padding:12px 18px; border-radius:14px; font-weight:700; font-size:14px; min-height:44px;
+  transition:opacity .15s ease, transform .1s ease; }
+.btn:active{ transform:scale(.97); }
+.btn-primary{ background:var(--primary); color:var(--on-primary); }
+.btn-ghost{ background:var(--chip-bg); color:var(--fg); }
+.btn-danger{ background:transparent; color:var(--danger); border:1px solid var(--danger); }
+.btn-block{ width:100%; }
+.field{ margin-bottom:14px; }
+.field label{ display:block; font-size:11px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+.input{ width:100%; padding:12px 14px; border-radius:12px; border:1px solid var(--border);
+  background:var(--bg-2); font-size:15px; min-height:44px; }
+.input:focus{ outline:2px solid var(--link); outline-offset:0; }
+.seg{ display:flex; background:var(--bg-2); border:1px solid var(--border); border-radius:14px; padding:4px; gap:4px; }
+.seg button{ flex:1; padding:9px 6px; border-radius:10px; font-size:12.5px; font-weight:700; color:var(--muted); min-height:38px; }
+.seg button.on{ background:var(--primary); color:var(--on-primary); }
+.chip{ display:inline-block; padding:3px 8px; border-radius:8px; font-size:10px; font-weight:800; letter-spacing:.03em; }
+.chip.p-high{ background:#FBE8CD; color:#92400E; }
+.chip.p-medium{ background:var(--chip-bg); color:var(--chip-fg); }
+.chip.p-low{ background:#DCFCE7; color:#166534; }
+html[data-theme="dark"] .chip.p-high{ background:rgba(251,191,36,.15); color:#FBBF24; }
+html[data-theme="dark"] .chip.p-low{ background:rgba(74,222,128,.15); color:#4ADE80; }
+.dot{ width:8px; height:8px; border-radius:50%; display:inline-block; }
+.sq{ width:38px; height:38px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.empty{ text-align:center; color:var(--muted); padding:36px 16px; font-size:14px; }
+.empty .btn{ margin-top:14px; }
+
+/* ============ AUTH ============ */
+#auth{ min-height:100dvh; display:flex; align-items:center; justify-content:center; padding:24px; }
+.auth-card{ width:100%; max-width:400px; padding:30px 26px; box-shadow:var(--shadow); }
+.auth-logo{ width:64px; height:64px; border-radius:18px; background:var(--primary); color:var(--on-primary);
+  display:flex; align-items:center; justify-content:center; margin:0 auto 18px; }
+.auth-card h1{ text-align:center; font-size:26px; line-height:1.2; }
+.auth-sub{ text-align:center; color:var(--muted); font-size:14px; margin:10px 0 22px; }
+.auth-tabs{ display:flex; gap:6px; margin-bottom:18px; }
+.auth-tabs button{ flex:1; padding:10px; border-radius:12px; font-weight:700; font-size:14px; color:var(--muted); background:var(--bg-2); min-height:44px; }
+.auth-tabs button.on{ background:var(--primary); color:var(--on-primary); }
+.form-err{ color:var(--danger); font-size:13px; font-weight:600; margin-bottom:12px; min-height:18px; }
+.demo-note{ margin-top:16px; font-size:11.5px; color:var(--muted); text-align:center; line-height:1.5; }
+
+/* ============ APP SHELL ============ */
+#app{ display:none; min-height:100dvh; }
+#app.on{ display:block; }
+.sidebar{ display:none; }
+.topbar{ position:sticky; top:0; z-index:20; display:flex; align-items:center; justify-content:space-between;
+  gap:12px; padding:14px 18px; background:var(--bg); border-bottom:1px solid var(--border); }
+.topbar h2{ font-size:20px; }
+.topbar .date{ font-size:12px; color:var(--muted); font-weight:600; }
+.topbar-right{ display:flex; align-items:center; gap:10px; }
+.icon-btn{ width:42px; height:42px; border-radius:12px; border:1px solid var(--border); background:var(--card);
+  display:flex; align-items:center; justify-content:center; color:var(--fg); }
+.avatar{ width:42px; height:42px; border-radius:50%; background:var(--primary); color:var(--on-primary);
+  display:flex; align-items:center; justify-content:center; font-weight:800; font-size:16px; }
+main{ max-width:860px; margin:0 auto; padding:20px 18px 120px; }
+.bottomnav{ position:fixed; bottom:0; left:0; right:0; z-index:30; display:flex; justify-content:space-around;
+  padding:8px 6px calc(10px + env(safe-area-inset-bottom)); background:var(--card); border-top:1px solid var(--border); }
+/* sliding highlight pill — moves horizontally to the active item */
+.bottomnav .nav-pill{ position:absolute; top:6px; left:0; height:48px; min-width:64px; border-radius:12px;
+  background:var(--bg-2); z-index:0; pointer-events:none;
+  transition:transform .32s cubic-bezier(.4,0,.2,1), width .32s ease; }
+.bottomnav button{ position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; gap:3px; color:var(--muted);
+  font-size:10px; font-weight:700; padding:4px 10px; border-radius:10px; min-width:64px; min-height:48px;
+  transition:color .25s ease; }
+.bottomnav button.on{ color:var(--link); }
+.fab{ position:fixed; right:20px; bottom:92px; z-index:30; width:58px; height:58px; border-radius:18px;
+  background:var(--primary); color:var(--on-primary); display:flex; align-items:center; justify-content:center;
+  box-shadow:var(--shadow); transition:transform .1s ease; }
+.fab:active{ transform:scale(.92); }
+
+/* ============ VIEWS ============ */
+.greet{ margin-bottom:18px; }
+.greet h1{ font-size:26px; }
+.greet p{ color:var(--muted); font-size:13px; margin-top:4px; font-weight:600; }
+.progress-card{ background:var(--primary); color:var(--on-primary); border-radius:22px; padding:20px; margin-bottom:22px; }
+.progress-card .lbl{ font-size:11px; font-weight:800; letter-spacing:.08em; opacity:.9; }
+.progress-card .val{ font-size:26px; margin:6px 0 2px; }
+.progress-card .sub{ font-size:12px; font-weight:700; opacity:.9; }
+.bar{ height:10px; border-radius:99px; background:rgba(255,255,255,.28); overflow:hidden; margin-top:14px; }
+.bar i{ display:block; height:100%; border-radius:99px; background:var(--on-primary); transition:width .3s ease; }
+.sec{ margin-bottom:24px; }
+.sec-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.sec-head h3{ font-size:17px; }
+.sec-head .act{ font-size:12.5px; font-weight:800; color:var(--link); }
+.list{ display:flex; flex-direction:column; gap:10px; }
+.row{ display:flex; align-items:center; gap:12px; padding:13px 14px; border-radius:16px; }
+.row .body{ flex:1; min-width:0; }
+.row .t{ font-size:14.5px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.row .m{ font-size:12px; color:var(--muted); margin-top:2px; font-weight:600; }
+.row .m .hot{ color:var(--link); font-weight:800; }
+.row .m .late{ color:var(--danger); font-weight:800; }
+.row.done .t{ text-decoration:line-through; color:var(--muted); }
+.check{ width:26px; height:26px; border-radius:50%; border:2px solid var(--border); flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; color:transparent; background:transparent; }
+.check.on{ background:var(--primary); border-color:var(--primary); color:var(--on-primary); }
+.bar-v{ width:5px; height:38px; border-radius:99px; flex-shrink:0; }
+.group-lbl{ font-size:11px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); margin:16px 2px 8px; }
+.group-lbl.late{ color:var(--danger); }
+.tabs{ display:flex; gap:6px; margin-bottom:6px; }
+.tabs button{ flex:1; padding:10px 4px; border-radius:12px; background:var(--bg-2); border:1px solid var(--border);
+  font-size:12px; font-weight:800; color:var(--muted); min-height:44px; }
+.tabs button.on{ background:var(--primary); color:var(--on-primary); border-color:var(--primary); }
+.search{ margin:12px 0 4px; }
+/* calendar */
+.cal-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.cal-head h3{ font-size:19px; }
+.cal-nav{ display:flex; gap:8px; }
+.dows,.cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+.dows span{ text-align:center; font-size:10px; font-weight:800; color:var(--muted); padding-bottom:6px; }
+.cal-cell{ aspect-ratio:1; border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:3px; font-size:13px; font-weight:700; color:var(--fg); position:relative; border:1px solid transparent; }
+.cal-cell.dim{ color:var(--muted); opacity:.45; }
+.cal-cell.today{ border-color:var(--primary); }
+.cal-cell.sel{ background:var(--primary); color:var(--on-primary); }
+.cal-cell .dots{ display:flex; gap:2px; position:absolute; bottom:5px; }
+.cal-cell .dots i{ width:4px; height:4px; border-radius:50%; }
+/* subjects */
+.subj-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+.subj-card{ padding:16px; text-align:left; }
+.subj-card .n{ font-weight:800; font-size:15px; margin-top:10px; }
+.subj-card .who{ font-size:12px; color:var(--muted); margin-top:2px; font-weight:600; }
+.subj-card .cnt{ font-size:12px; font-weight:800; color:var(--link); margin-top:8px; }
+.subj-card .cnt.late{ color:var(--danger); }
+.subj-add{ border:2px dashed var(--border); background:transparent; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:6px; color:var(--muted); font-weight:700; font-size:13px; min-height:120px; }
+/* profile */
+.prof-head{ display:flex; flex-direction:column; align-items:center; padding:26px 0 20px; }
+.prof-head .avatar{ width:84px; height:84px; font-size:32px; }
+.prof-head h2{ margin-top:14px; font-size:22px; }
+.prof-head p{ color:var(--muted); font-size:13px; margin-top:4px; font-weight:600; }
+.set-row{ display:flex; align-items:center; justify-content:space-between; gap:14px; padding:16px; margin-bottom:10px; }
+.set-row .lbl{ font-weight:700; font-size:14.5px; }
+.set-row .hint{ font-size:12px; color:var(--muted); margin-top:2px; }
+
+/* ============ SHEET / MODAL ============ */
+#overlay{ position:fixed; inset:0; z-index:50; background:var(--overlay); display:none;
+  align-items:flex-end; justify-content:center; }
+#overlay.on{ display:flex; }
+.sheet{ width:100%; max-width:520px; background:var(--card); border-radius:24px 24px 0 0;
+  padding:22px 22px calc(26px + env(safe-area-inset-bottom)); max-height:88dvh; overflow-y:auto;
+  animation:up .22s ease; }
+@keyframes up{ from{ transform:translateY(40px); opacity:.5; } to{ transform:none; opacity:1; } }
+@media (prefers-reduced-motion:reduce){ .sheet{ animation:none; } }
+.sheet-grip{ width:44px; height:5px; border-radius:99px; background:var(--border); margin:-8px auto 16px; }
+.sheet h3{ font-size:19px; margin-bottom:18px; }
+.swatches{ display:flex; flex-wrap:wrap; gap:10px; }
+.swatch{ width:40px; height:40px; border-radius:12px; border:3px solid transparent; }
+.swatch.on{ border-color:var(--fg); }
+.sheet-actions{ display:flex; gap:10px; margin-top:8px; }
+.sheet-actions .btn{ flex:1; }
+@media (min-width:640px){ #overlay{ align-items:center; } .sheet{ border-radius:24px; } .sheet-grip{ display:none; } }
+
+/* toast */
+#toast{ position:fixed; left:50%; bottom:110px; transform:translateX(-50%) translateY(20px); z-index:60;
+  background:var(--fg); color:var(--bg); padding:11px 20px; border-radius:99px; font-size:13px; font-weight:700;
+  opacity:0; pointer-events:none; transition:all .25s ease; white-space:nowrap; }
+#toast.on{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* ============ DESKTOP ============ */
+@media (min-width:900px){
+  #app.on{ display:flex; }
+  .sidebar{ display:flex; flex-direction:column; width:250px; flex-shrink:0; padding:22px 16px;
+    border-right:1px solid var(--border); position:sticky; top:0; height:100dvh; }
+  .side-logo{ display:flex; align-items:center; gap:10px; padding:0 8px 22px; }
+  .side-logo .mark{ width:38px; height:38px; border-radius:12px; background:var(--primary); color:var(--on-primary);
+    display:flex; align-items:center; justify-content:center; }
+  .side-logo span{ font-weight:800; font-size:17px; }
+  .side-nav{ display:flex; flex-direction:column; gap:4px; position:relative; }
+  /* sliding highlight pill — moves to the active item */
+  .side-nav .nav-pill{ position:absolute; left:0; right:0; top:0; height:46px; border-radius:12px;
+    background:var(--primary); z-index:0; pointer-events:none;
+    transition:transform .32s cubic-bezier(.4,0,.2,1), height .32s ease; }
+  .side-nav button{ position:relative; z-index:1; display:flex; align-items:center; gap:12px; padding:12px 14px;
+    border-radius:12px; font-weight:700; font-size:14.5px; color:var(--muted); min-height:46px;
+    transition:color .25s ease; }
+  .side-nav button.on{ color:var(--on-primary); }
+  .side-user{ margin-top:auto; display:flex; align-items:center; gap:10px; padding:12px; border-radius:14px;
+    border:1px solid var(--border); background:var(--card); width:100%; }
+  .side-user .avatar{ width:36px; height:36px; font-size:14px; }
+  .side-user .info{ text-align:left; min-width:0; }
+  .side-user .info b{ font-size:13.5px; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .side-user .info small{ font-size:11px; color:var(--muted); }
+  .content{ flex:1; }
+  .topbar{ padding:16px 32px; }
+  main{ padding:26px 32px 60px; }
+  .bottomnav{ display:none; }
+  .fab{ bottom:28px; right:32px; }
+  .subj-grid{ grid-template-columns:repeat(3,1fr); }
+  #toast{ bottom:40px; }
+}
+</style>
+<!-- Supabase JS (auth + database). Optional: demo still works on localStorage without it. -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+
+<!-- ================= AUTH ================= -->
+<div id="auth">
+  <div class="card auth-card">
+    <div class="auth-logo" id="authLogo"></div>
+    <h1>Stay on top<br>of school.</h1>
+    <p class="auth-sub">Homework, assignments &amp; your day — all in one place.</p>
+
+    <div class="auth-tabs">
+      <button id="tabLogin" class="on" onclick="authMode('login')">Log in</button>
+      <button id="tabSignup" onclick="authMode('signup')">Sign up</button>
+    </div>
+
+    <div class="form-err" id="authErr"></div>
+    <form id="authForm" autocomplete="off">
+      <div class="field" id="nameField" style="display:none">
+        <label for="aName">Name</label>
+        <input class="input" id="aName" placeholder="Maya Okafor" />
+      </div>
+      <div class="field" id="gradeField" style="display:none">
+        <label for="aGrade">Grade level</label>
+        <select class="input" id="aGrade">
+          <option>9th grade</option><option selected>10th grade</option>
+          <option>11th grade</option><option>12th grade</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="aEmail">Email</label>
+        <input class="input" id="aEmail" type="email" placeholder="you@school.edu" />
+      </div>
+      <div class="field">
+        <label for="aPass">Password</label>
+        <input class="input" id="aPass" type="password" placeholder="At least 6 characters" />
+      </div>
+      <button class="btn btn-primary btn-block" id="authSubmit" type="submit">Log in</button>
+    </form>
+    <p class="demo-note">Demo build — accounts &amp; data are stored only in this browser/device (localStorage). No server, no real login.</p>
+  </div>
+</div>
+
+<!-- ================= APP ================= -->
+<div id="app">
+  <!-- sidebar (desktop) -->
+  <aside class="sidebar">
+    <div class="side-logo"><span class="mark" id="sideMark"></span><span>StudentFlow</span></div>
+    <nav class="side-nav" id="sideNav"></nav>
+    <button class="side-user" onclick="go('profile')">
+      <span class="avatar" id="sideAvatar">M</span>
+      <span class="info"><b id="sideName">—</b><small id="sideGrade">—</small></span>
+    </button>
+  </aside>
+
+  <div class="content">
+    <header class="topbar">
+      <div>
+        <h2 id="pageTitle">Today</h2>
+        <div class="date" id="pageDate"></div>
+      </div>
+      <div class="topbar-right">
+        <button class="icon-btn" id="themeBtn" onclick="toggleTheme()" aria-label="Toggle light and dark mode"></button>
+        <button class="avatar" id="topAvatar" onclick="go('profile')" aria-label="Profile">M</button>
+      </div>
+    </header>
+    <main id="view"></main>
+  </div>
+
+  <nav class="bottomnav" id="bottomNav"></nav>
+  <button class="fab" id="fab" onclick="fabAction()" aria-label="Add"></button>
+</div>
+
+<!-- sheet -->
+<div id="overlay" onclick="if(event.target===this)closeSheet()">
+  <div class="sheet" role="dialog" aria-modal="true">
+    <div class="sheet-grip"></div>
+    <div id="sheetBody"></div>
+  </div>
+</div>
+<div id="toast" role="status"></div>
+
+<script>
+'use strict';
+/* ============================================================
+   StudentFlow demo — single file, localStorage only.
+   Data model mirrors docs/DATABASE.md so a real backend
+   (Supabase) can replace the storage layer later 1:1.
+   ============================================================ */
+
+/* ---------- tiny storage layer (swap for Supabase later) ---------- */
+const Store = {
+  get(k, dflt){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : dflt; }catch(e){ return dflt; } },
+  set(k, val){ try{ localStorage.setItem(k, JSON.stringify(val)); }catch(e){} }
+};
+
+/* ============================================================
+   SUPABASE (optional)
+   Paste your project's keys below (Supabase → Project Settings → API).
+   Until real keys are here, the demo runs fully on localStorage —
+   nothing breaks. Once keys are added, auth + data go to Supabase
+   and sync across devices. See docs/DATABASE.md + NEXT-STEPS.md.
+   ============================================================ */
+const SUPABASE_URL      = 'https://wnnyjrdzgjfwfyvedlig.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_l8VyHKuwLH4kStQlePUa-Q_CnTTLJ1_';
+const SUPABASE_READY    = !!(window.supabase && !SUPABASE_URL.includes('YOUR-PROJECT-REF'));
+const sb = SUPABASE_READY ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+/* Map between the demo's in-memory model and the DB schema (docs/DATABASE.md).
+   assignments.due_date is timestamptz — stored as local "YYYY-MM-DDTHH:MM" and
+   read back the same way (Supabase sessions run in UTC, so it round-trips). */
+const DB = {
+  subjFrom: s => ({ id:s.id, name:s.name, color:s.color, teacher:s.teacher_name || '' }),
+  subjTo:   s => ({ name:s.name, color:s.color, teacher_name:s.teacher || null }),
+  asgFrom:  a => ({
+    id:a.id, title:a.title, subjectId:a.subject_id || null, type:a.type || 'homework',
+    dueDate:(a.due_date||'').slice(0,10), dueTime:(a.due_date||'').slice(11,16),
+    status:a.status || 'todo', priority:a.priority || 'medium'
+  }),
+  asgTo:    a => ({
+    title:a.title, subject_id:a.subjectId || null, type:a.type,
+    due_date:a.dueDate + 'T' + (a.dueTime || '23:59') + ':00',
+    status:a.status, priority:a.priority
+  }),
+  taskFrom: t => ({ id:t.id, title:t.title, date:t.due_date, time:(t.time||'').slice(0,5), kind:t.kind, done:t.is_done }),
+  taskTo:   t => ({ title:t.title, due_date:t.date, time:t.time || null, kind:t.kind, is_done:t.done })
+};
+
+/* Async data access — Supabase when configured, else localStorage. */
+const api = {
+  /* --- auth --- */
+  async signUp(name, email, pass, grade){
+    const { data, error } = await sb.auth.signUp({ email, password: pass });
+    if(error) throw error;
+    // create the profile row (RLS: user can insert their own)
+    if(data.user){
+      await sb.from('profiles').upsert({ id:data.user.id, full_name:name, grade_level:grade });
+    }
+    return data.user;
+  },
+  async signIn(email, pass){
+    const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+    if(error) throw error;
+    return data.user;
+  },
+  async signOut(){ await sb.auth.signOut(); },
+  async getSession(){ const { data } = await sb.auth.getSession(); return data.session; },
+
+  /* --- profile --- */
+  async loadProfile(user){
+    const { data } = await sb.from('profiles').select('full_name, grade_level').eq('id', user.id).maybeSingle();
+    return { id:user.id, email:user.email,
+             name:(data && data.full_name) || user.email.split('@')[0],
+             grade:(data && data.grade_level) || '10th grade' };
+  },
+
+  /* --- load everything for the signed-in user --- */
+  async loadAll(){
+    const [s, a, t] = await Promise.all([
+      sb.from('subjects').select('*').order('created_at'),
+      sb.from('assignments').select('*').order('due_date'),
+      sb.from('tasks').select('*').order('due_date')
+    ]);
+    return {
+      subjects:  (s.data || []).map(DB.subjFrom),
+      assignments:(a.data || []).map(DB.asgFrom),
+      tasks:     (t.data || []).map(DB.taskFrom)
+    };
+  },
+
+  /* --- write-through mutations --- */
+  async saveSubject(s){ await upsert('subjects', s, DB.subjTo); },
+  async deleteSubject(id){ if(isUuid(id)) await sb.from('subjects').delete().eq('id', id); },
+  async saveAssignment(a){ await upsert('assignments', a, DB.asgTo); },
+  async deleteAssignment(id){ if(isUuid(id)) await sb.from('assignments').delete().eq('id', id); },
+  async saveTask(t){ await upsert('tasks', t, DB.taskTo); },
+  async deleteTask(id){ if(isUuid(id)) await sb.from('tasks').delete().eq('id', id); }
+};
+
+/* A record with a real uuid id is an update; otherwise it's a new insert. */
+const isUuid = v => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(v || ''));
+async function upsert(table, rec, toRow){
+  const row = toRow(rec);
+  if(isUuid(rec.id)){
+    await sb.from(table).update(row).eq('id', rec.id);
+  } else {
+    const { data, error } = await sb.from(table).insert(Object.assign({ user_id: me.id }, row)).select();
+    if(error){ console.warn(table + ' insert:', error.message); return; }
+    if(data && data[0]) rec.id = data[0].id;   // adopt the real uuid
+  }
+}
+
+/* ---------- utils ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const ymd = d => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+const parseYmd = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
+const todayStr = () => ymd(new Date());
+function fmtDate(s){
+  const d = parseYmd(s);
+  return d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+}
+function fmtTime(t){
+  if(!t) return '';
+  let [h,m] = t.split(':').map(Number);
+  const ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12;
+  return h + ':' + String(m).padStart(2,'0') + ' ' + ap;
+}
+function dayDiff(s){ return Math.round((parseYmd(s) - parseYmd(todayStr())) / 86400000); }
+
+/* ---------- inline SVG icons (no external deps) ---------- */
+const P = {
+  house:'<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/>',
+  checklist:'<path d="M11 6h9M11 12h9M11 18h9"/><path d="m3 6 1.5 1.5L7.5 4.5M3 12l1.5 1.5L7.5 10.5M3 18l1.5 1.5L7.5 16.5"/>',
+  calendar:'<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/>',
+  books:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20V2H6.5A2.5 2.5 0 0 0 4 4.5z"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  check:'<path d="m5 12 4.5 4.5L19 7"/>',
+  sun:'<circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"/>',
+  moon:'<path d="M20.5 13.2A8.5 8.5 0 1 1 10.8 3.5a6.8 6.8 0 0 0 9.7 9.7z"/>',
+  cap:'<path d="m2.5 9 9.5-4.5L21.5 9 12 13.5 2.5 9Z"/><path d="M6.5 11.2V16c0 1.4 2.5 2.8 5.5 2.8s5.5-1.4 5.5-2.8v-4.8"/>',
+  trash:'<path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13"/>',
+  pencil:'<path d="M4 20h4L20.5 7.5a2.1 2.1 0 0 0-3-3L5 17v3Z"/>',
+  left:'<path d="m14.5 18-6-6 6-6"/>',
+  right:'<path d="m9.5 6 6 6-6 6"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5.2l3.3 2"/>',
+  logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/>',
+  user:'<circle cx="12" cy="8" r="4"/><path d="M4.5 20.5a7.5 7.5 0 0 1 15 0"/>',
+  bell:'<path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9"/><path d="M10.2 20.5a2 2 0 0 0 3.6 0"/>',
+  rotate:'<path d="M3 12a9 9 0 1 0 2.6-6.4M3 4v5h5"/>'
+};
+function ic(name, size){
+  size = size || 20;
+  return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" '+
+    'stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(P[name]||'')+'</svg>';
+}
+
+/* ---------- state ---------- */
+const SUBJECT_COLORS = ['#8B5CF6','#10B981','#F59E0B','#EC4899','#3B82F6','#EF4444','#0D9488','#6366F1'];
+const TYPES = ['homework','assignment','project','exam'];
+let me = null;            // current user record
+let data = null;          // {subjects, assignments, tasks}
+let view = 'today';
+let asgTab = 'todo';
+let asgQuery = '';
+let calCursor = new Date();   // any date inside the displayed month
+let calSelected = todayStr();
+
+/* ---------- theme ---------- */
+function applyTheme(t){
+  document.documentElement.dataset.theme = t;
+  Store.set('sf_theme', t);
+  $('#themeBtn').innerHTML = ic(t === 'dark' ? 'sun' : 'moon', 21);
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if(meta) meta.content = t === 'dark' ? '#17100A' : '#F4EDDF';
+}
+function toggleTheme(){
+  applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+}
+
+/* ---------- auth ---------- */
+let mode = 'login';
+function authMode(m){
+  mode = m;
+  $('#tabLogin').classList.toggle('on', m === 'login');
+  $('#tabSignup').classList.toggle('on', m === 'signup');
+  $('#nameField').style.display = m === 'signup' ? '' : 'none';
+  $('#gradeField').style.display = m === 'signup' ? '' : 'none';
+  $('#authSubmit').textContent = m === 'signup' ? 'Create account' : 'Log in';
+  $('#authErr').textContent = '';
+}
+$('#authForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const email = $('#aEmail').value.trim().toLowerCase();
+  const pass = $('#aPass').value;
+  const err = $('#authErr');
+  err.textContent = '';
+  if(!email || !email.includes('@')){ err.textContent = 'Enter a valid email.'; return; }
+  if(pass.length < 6){ err.textContent = 'Password needs at least 6 characters.'; return; }
+
+  /* ----- Supabase mode ----- */
+  if(SUPABASE_READY){
+    const btn = $('#authSubmit'); const label = btn.textContent;
+    btn.textContent = 'Working…'; btn.disabled = true;
+    try{
+      if(mode === 'signup'){
+        const name = $('#aName').value.trim();
+        if(name.length < 2){ err.textContent = 'Enter your name.'; btn.textContent = label; btn.disabled = false; return; }
+        const user = await api.signUp(name, email, pass, $('#aGrade').value);
+        if(user && !user.email_confirmed_at){
+          err.textContent = 'Check your email to confirm your account, then log in.';
+          btn.textContent = label; btn.disabled = false; return;
+        }
+        if(user) await enterSupabase(user);
+      } else {
+        const user = await api.signIn(email, pass);
+        await enterSupabase(user);
+      }
+    }catch(ex){
+      err.textContent = ex.message || 'Something went wrong.';
+      btn.textContent = label; btn.disabled = false;
+    }
+    return;
+  }
+
+  /* ----- demo mode (localStorage) ----- */
+  const users = Store.get('sf_users', []);
+  if(mode === 'signup'){
+    const name = $('#aName').value.trim();
+    if(name.length < 2){ err.textContent = 'Enter your name.'; return; }
+    if(users.some(u => u.email === email)){ err.textContent = 'That email already has an account. Log in instead.'; return; }
+    const user = { id: uid(), name, email, pass, grade: $('#aGrade').value, created: new Date().toISOString() };
+    users.push(user); Store.set('sf_users', users);
+    Store.set('sf_data_' + user.id, seedData());
+    startSession(user);
+  } else {
+    const user = users.find(u => u.email === email && u.pass === pass);
+    if(!user){ err.textContent = 'No account with that email/password.'; return; }
+    startSession(user);
+  }
+});
+
+/* enter the app using Supabase (load profile + all data) */
+async function enterSupabase(user){
+  me = await api.loadProfile(user);
+  data = await api.loadAll();
+  // brand-new account → seed some sample content so it isn't empty
+  if(!data.subjects.length && !data.assignments.length && !data.tasks.length){
+    await seedSupabase();
+    data = await api.loadAll();
+  }
+  showApp();
+  toast('Welcome back, ' + me.name.split(' ')[0] + '!');
+}
+function showApp(){
+  $('#auth').style.display = 'none';
+  $('#app').classList.add('on');
+  go('today');
+}
+
+function startSession(user){
+  me = user;
+  Store.set('sf_session', user.id);
+  data = Store.get('sf_data_' + user.id, seedData());
+  showApp();
+  toast('Welcome back, ' + me.name.split(' ')[0] + '!');
+}
+async function logout(){
+  if(SUPABASE_READY) await api.signOut();
+  Store.set('sf_session', null);
+  me = null; data = null;
+  $('#app').classList.remove('on');
+  $('#auth').style.display = 'flex';
+  $('#authForm').reset();
+  authMode('login');
+}
+
+/* push the sample seed data to Supabase for a brand-new account */
+async function seedSupabase(){
+  const s = seedData();
+  // insert subjects first, keeping a map from the seed id → the real uuid
+  const idMap = {};
+  for(const subj of s.subjects){
+    const seedId = subj.id; delete subj.id;
+    await api.saveSubject(subj);           // api sets subj.id to the new uuid
+    idMap[seedId] = subj.id;
+  }
+  for(const a of s.assignments){
+    a.subjectId = a.subjectId ? idMap[a.subjectId] || null : null;
+    delete a.id;
+    await api.saveAssignment(a);
+  }
+  for(const t of s.tasks){ delete t.id; await api.saveTask(t); }
+}
+
+/* ---------- seed demo content (dates relative to today) ---------- */
+function seedData(){
+  const t = new Date();
+  const dOff = n => { const d = new Date(t); d.setDate(d.getDate() + n); return ymd(d); };
+  const S = (name, color, teacher) => ({ id: uid(), name, color, teacher });
+  const math = S('Math', '#8B5CF6', 'Ms. Rivera');
+  const bio  = S('Biology', '#10B981', 'Mr. Chen');
+  const hist = S('History', '#F59E0B', 'Mrs. Adeyemi');
+  const eng  = S('English', '#EC4899', 'Mr. Davis');
+  const chem = S('Chemistry', '#3B82F6', 'Ms. Park');
+  const A = (title, subj, type, dueDate, dueTime, status, priority) => ({
+    id: uid(), title, subjectId: subj ? subj.id : null, type, dueDate, dueTime, status, priority
+  });
+  return {
+    subjects: [math, bio, hist, eng, chem],
+    assignments: [
+      A('Essay — The Great Gatsby', eng, 'assignment', dOff(-1), '23:59', 'todo', 'high'),
+      A('Algebra hw — Ch. 7 problems', math, 'homework', dOff(0), '18:00', 'todo', 'high'),
+      A('Lab report draft', chem, 'assignment', dOff(0), '23:59', 'in_progress', 'medium'),
+      A('History project — WW2 timeline', hist, 'project', dOff(3), '', 'todo', 'medium'),
+      A('Bio quiz — Cells study guide', bio, 'homework', dOff(3), '', 'todo', 'low'),
+      A('Chapter 5 reading notes', eng, 'homework', dOff(-2), '17:00', 'done', 'medium')
+    ],
+    tasks: [
+      { id: uid(), title: 'Review chem notes', date: dOff(0), time: '', kind: 'study', done: true },
+      { id: uid(), title: 'Gym', date: dOff(0), time: '17:30', kind: 'activity', done: false },
+      { id: uid(), title: 'Read History ch. 4', date: dOff(0), time: '', kind: 'study', done: false }
+    ]
+  };
+}
+function save(){ Store.set('sf_data_' + me.id, data); }
+
+/* ---------- nav ---------- */
+const NAV = [
+  { id:'today', label:'Today', icon:'house' },
+  { id:'assignments', label:'Assignments', icon:'checklist' },
+  { id:'calendar', label:'Calendar', icon:'calendar' },
+  { id:'subjects', label:'Subjects', icon:'books' }
+];
+function go(v){
+  view = v;
+  render();
+}
+function render(){
+  // chrome
+  $('#bottomNav').innerHTML = '<span class="nav-pill" id="bnPill"></span>' + NAV.map(n =>
+    '<button class="' + (view === n.id ? 'on' : '') + '" onclick="go(\'' + n.id + '\')">' + ic(n.icon, 22) + '<span>' + n.label + '</span></button>'
+  ).join('');
+  $('#sideNav').innerHTML = '<span class="nav-pill" id="snPill"></span>' + NAV.map(n =>
+    '<button class="' + (view === n.id ? 'on' : '') + '" onclick="go(\'' + n.id + '\')">' + ic(n.icon, 19) + '<span>' + n.label + '</span></button>'
+  ).join('') +
+  '<button class="' + (view === 'profile' ? 'on' : '') + '" onclick="go(\'profile\')">' + ic('user', 19) + '<span>Profile</span></button>';
+  slideNav();
+  const initial = me.name.trim()[0].toUpperCase() || 'S';
+  $('#topAvatar').textContent = initial;
+  $('#sideAvatar').textContent = initial;
+  $('#sideName').textContent = me.name;
+  $('#sideGrade').textContent = me.grade;
+  const titles = { today:'Today', assignments:'Assignments', calendar:calCursor.toLocaleDateString('en-US',{month:'long', year:'numeric'}), subjects:'Subjects', profile:'Profile' };
+  $('#pageTitle').textContent = titles[view];
+  $('#pageDate').textContent = new Date().toLocaleDateString('en-US', { weekday:'long', month:'short', day:'numeric' });
+  $('#fab').style.display = (view === 'calendar' || view === 'profile') ? 'none' : 'flex';
+  $('#fab').innerHTML = ic('plus', 26);
+  // views
+  const R = { today: viewToday, assignments: viewAssignments, calendar: viewCalendar, subjects: viewSubjects, profile: viewProfile }[view];
+  $('#view').innerHTML = R();
+}
+function fabAction(){
+  if(view === 'subjects') openSubjectSheet(null);
+  else openAssignmentSheet(null);
+}
+
+/* ---------- sliding nav indicator ---------- */
+let _pillLast = { side: null, bottom: null };
+function slideNav(){
+  move($('#sideNav'), $('#snPill'), 'side', 'y');
+  move($('#bottomNav'), $('#bnPill'), 'bottom', 'x');
+}
+function move(nav, pill, key, axis){
+  if(!nav || !pill) return;
+  const act = nav.querySelector('button.on');
+  if(!act) return;
+  const pos = axis === 'y'
+    ? { v: act.offsetTop, size: act.offsetHeight }
+    : { v: act.offsetLeft,  size: act.offsetWidth };
+  const prev = _pillLast[key];
+  // jump to previous position with no transition…
+  pill.style.transition = 'none';
+  if(prev){
+    pill.style[axis === 'y' ? 'height' : 'width'] = prev.size + 'px';
+    pill.style.transform = 'translate' + (axis === 'y' ? 'Y' : 'X') + '(' + prev.v + 'px)';
+  }
+  pill.offsetHeight; // force reflow
+  // …then animate to the new position
+  pill.style.transition = '';
+  pill.style[axis === 'y' ? 'height' : 'width'] = pos.size + 'px';
+  pill.style.transform = 'translate' + (axis === 'y' ? 'Y' : 'X') + '(' + pos.v + 'px)';
+  _pillLast[key] = pos;
+}
+window.addEventListener('resize', slideNav);
+
+/* ---------- helpers ---------- */
+function subjOf(a){ return data.subjects.find(s => s.id === a.subjectId) || null; }
+function dueMeta(a){
+  if(a.status === 'done') return { text: 'Done', cls: '' };
+  const diff = dayDiff(a.dueDate);
+  if(diff < 0) return { text: diff === -1 ? 'Due yesterday' : 'Due ' + fmtDate(a.dueDate), cls: 'late' };
+  if(diff === 0) return { text: a.dueTime ? fmtTime(a.dueTime) : 'Due today', cls: 'hot' };
+  if(diff === 1) return { text: 'Tomorrow', cls: '' };
+  return { text: fmtDate(a.dueDate), cls: '' };
+}
+const STATUS_LBL = { todo:'To-do', in_progress:'In progress', done:'Done' };
+
+function assignmentRow(a){
+  const s = subjOf(a);
+  const meta = dueMeta(a);
+  const color = s ? s.color : 'var(--border)';
+  return '<div class="card row' + (a.status === 'done' ? ' done' : '') + '">' +
+    '<button class="check' + (a.status === 'done' ? ' on' : '') + '" onclick="toggleDone(\'' + a.id + '\')" aria-label="Toggle done">' + ic('check', 15) + '</button>' +
+    '<span class="bar-v" style="background:' + color + '"></span>' +
+    '<button class="body" style="text-align:left" onclick="openAssignmentSheet(\'' + a.id + '\')">' +
+      '<div class="t">' + esc(a.title) + '</div>' +
+      '<div class="m">' + (s ? esc(s.name) + ' · ' : '') + '<span class="' + meta.cls + '">' + meta.text + '</span></div>' +
+    '</button>' +
+    '<span class="chip p-' + a.priority + '">' + a.priority.toUpperCase() + '</span>' +
+  '</div>';
+}
+function taskRow(t){
+  return '<div class="card row' + (t.done ? ' done' : '') + '">' +
+    '<button class="check' + (t.done ? ' on' : '') + '" onclick="toggleTask(\'' + t.id + '\')" aria-label="Toggle done">' + ic('check', 15) + '</button>' +
+    '<button class="body" style="text-align:left" onclick="openTaskSheet(\'' + t.id + '\')">' +
+      '<div class="t">' + esc(t.title) + '</div>' +
+      (t.time ? '<div class="m"><span class="hot">' + fmtTime(t.time) + '</span> · ' + t.kind + '</div>' : '<div class="m">' + t.kind + '</div>') +
+    '</button>' +
+  '</div>';
+}
+
+/* ---------- view: Today ---------- */
+function viewToday(){
+  const t = todayStr();
+  const todayAsg = data.assignments.filter(a => a.dueDate === t && a.status !== 'done');
+  const overdue = data.assignments.filter(a => a.status !== 'done' && dayDiff(a.dueDate) < 0);
+  const todayTasks = data.tasks.filter(x => x.date === t);
+  const total = todayAsg.length + overdue.length + todayTasks.length;
+  const done = data.assignments.filter(a => a.dueDate === t && a.status === 'done').length +
+               data.tasks.filter(x => x.date === t && x.done).length;
+  const pct = total ? Math.round(done / total * 100) : 0;
+
+  const hour = new Date().getHours();
+  const part = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+
+  // coming up: next 5 non-done assignments after today, grouped by date
+  const upcoming = data.assignments
+    .filter(a => a.status !== 'done' && dayDiff(a.dueDate) > 0)
+    .sort((a,b) => a.dueDate.localeCompare(b.dueDate))
+    .slice(0, 5);
+
+  let h = '<div class="greet"><h1>' + part + ', ' + esc(me.name.split(' ')[0]) + '</h1>' +
+          '<p>' + new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' }) + '</p></div>';
+
+  h += '<div class="progress-card"><div class="lbl">TODAY’S PROGRESS</div>' +
+       '<div class="val serif">' + done + ' of ' + total + ' done</div>' +
+       (total ? '<div class="sub">' + pct + '% — ' + (total - done) + ' left today</div>' : '<div class="sub">Nothing scheduled — add something!</div>') +
+       '<div class="bar"><i style="width:' + pct + '%"></i></div></div>';
+
+  if(overdue.length){
+    h += '<div class="sec"><div class="group-lbl late">Overdue</div><div class="list">' +
+         overdue.sort((a,b) => a.dueDate.localeCompare(b.dueDate)).map(assignmentRow).join('') + '</div></div>';
+  }
+  h += '<div class="sec"><div class="sec-head"><h3>Due today</h3>' +
+       '<button class="act" onclick="go(\'assignments\')">See all</button></div>';
+  h += todayAsg.length
+    ? '<div class="list">' + todayAsg.map(assignmentRow).join('') + '</div>'
+    : '<div class="card empty">Nothing due today.<br><button class="btn btn-primary" onclick="openAssignmentSheet(null)">' + ic('plus',16) + ' Add assignment</button></div>';
+  h += '</div>';
+
+  h += '<div class="sec"><div class="sec-head"><h3>Daily activities</h3></div>';
+  h += todayTasks.length
+    ? '<div class="list">' + todayTasks.map(taskRow).join('') + '</div>'
+    : '<div class="card empty">No activities planned.<br><button class="btn btn-primary" onclick="openTaskSheet(null)">' + ic('plus',16) + ' Add activity</button></div>';
+  h += '<div style="margin-top:10px"><button class="btn btn-ghost btn-block" onclick="openTaskSheet(null)">' + ic('plus',16) + ' Add activity</button></div></div>';
+
+  if(upcoming.length){
+    const byDate = {};
+    upcoming.forEach(a => { (byDate[a.dueDate] = byDate[a.dueDate] || []).push(a); });
+    h += '<div class="sec"><div class="sec-head"><h3>Coming up</h3></div>';
+    Object.keys(byDate).sort().forEach(d => {
+      h += '<div class="group-lbl">' + fmtDate(d) + '</div><div class="list">' + byDate[d].map(assignmentRow).join('') + '</div>';
+    });
+    h += '</div>';
+  }
+  return h;
+}
+
+/* ---------- view: Assignments ---------- */
+function viewAssignments(){
+  let h = '<div class="tabs">' +
+    ['todo','in_progress','done'].map(s =>
+      '<button class="' + (asgTab === s ? 'on' : '') + '" onclick="asgTab=\'' + s + '\';render()">' +
+      STATUS_LBL[s] + ' (' + data.assignments.filter(a => a.status === s).length + ')</button>'
+    ).join('') + '</div>';
+  h += '<div class="search"><input class="input" id="asgSearch" placeholder="Search assignments…" value="' + esc(asgQuery) + '" oninput="asgQuery=this.value;renderListOnly()"></div>';
+  h += '<div id="asgList">' + asgListHtml() + '</div>';
+  return h;
+}
+function asgListHtml(){
+  const q = asgQuery.trim().toLowerCase();
+  let items = data.assignments.filter(a => a.status === asgTab);
+  if(q) items = items.filter(a =>
+    a.title.toLowerCase().includes(q) ||
+    (subjOf(a) && subjOf(a).name.toLowerCase().includes(q)));
+  if(!items.length) return '<div class="card empty">' +
+    (q ? 'No matches for “' + esc(asgQuery) + '”.' :
+    (asgTab === 'done' ? 'Nothing finished yet — you got this.' : 'No assignments here.')) +
+    (q ? '' : '<br><button class="btn btn-primary" onclick="openAssignmentSheet(null)">' + ic('plus',16) + ' Add assignment</button>') + '</div>';
+
+  if(asgTab === 'done'){
+    return '<div class="list" style="margin-top:14px">' +
+      items.sort((a,b) => b.dueDate.localeCompare(a.dueDate)).map(assignmentRow).join('') + '</div>';
+  }
+  const groups = { Overdue:[], Today:[], 'This week':[], Later:[] };
+  items.forEach(a => {
+    const d = dayDiff(a.dueDate);
+    if(d < 0) groups.Overdue.push(a);
+    else if(d === 0) groups.Today.push(a);
+    else if(d <= 7) groups['This week'].push(a);
+    else groups.Later.push(a);
+  });
+  let h = '';
+  Object.keys(groups).forEach(g => {
+    if(!groups[g].length) return;
+    h += '<div class="group-lbl' + (g === 'Overdue' ? ' late' : '') + '">' + g + '</div><div class="list">' +
+      groups[g].sort((a,b) => a.dueDate.localeCompare(b.dueDate)).map(assignmentRow).join('') + '</div>';
+  });
+  return h;
+}
+function renderListOnly(){
+  const el = $('#asgList');
+  if(el) el.innerHTML = asgListHtml();
+}
+
+/* ---------- view: Calendar ---------- */
+function viewCalendar(){
+  const y = calCursor.getFullYear(), m = calCursor.getMonth();
+  const first = new Date(y, m, 1);
+  const startDow = first.getDay();
+  const dim = new Date(y, m + 1, 0).getDate();
+  const prevDim = new Date(y, m, 0).getDate();
+
+  // item dots per date
+  const marks = {};
+  const addMark = (d, color) => { (marks[d] = marks[d] || []).push(color); };
+  data.assignments.filter(a => a.status !== 'done').forEach(a => addMark(a.dueDate, subjOf(a) ? subjOf(a).color : 'var(--muted)'));
+  data.tasks.forEach(t => { if(!t.done) addMark(t.date, 'var(--primary)'); });
+
+  let cells = '';
+  for(let i = 0; i < startDow; i++) cells += '<div class="cal-cell dim">' + (prevDim - startDow + 1 + i) + '</div>';
+  for(let d = 1; d <= dim; d++){
+    const ds = ymd(new Date(y, m, d));
+    const dots = (marks[ds] || []).slice(0, 3).map(c => '<i style="background:' + c + '"></i>').join('');
+    cells += '<button class="cal-cell' + (ds === todayStr() ? ' today' : '') + (ds === calSelected ? ' sel' : '') +
+      '" onclick="calSelected=\'' + ds + '\';render()">' + d + '<span class="dots">' + dots + '</span></button>';
+  }
+  const tail = 7 - ((startDow + dim) % 7);
+  if(tail < 7) for(let i = 1; i <= tail; i++) cells += '<div class="cal-cell dim">' + i + '</div>';
+
+  let h = '<div class="cal-head"><h3>' + calCursor.toLocaleDateString('en-US', { month:'long', year:'numeric' }) + '</h3>' +
+    '<div class="cal-nav">' +
+      '<button class="icon-btn" onclick="calMove(-1)" aria-label="Previous month">' + ic('left',18) + '</button>' +
+      '<button class="btn btn-ghost" style="padding:0 14px;min-height:42px" onclick="calToday()">Today</button>' +
+      '<button class="icon-btn" onclick="calMove(1)" aria-label="Next month">' + ic('right',18) + '</button>' +
+    '</div></div>';
+  h += '<div class="dows"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div>';
+  h += '<div class="cal-grid">' + cells + '</div>';
+
+  // agenda for selected day
+  const aAsg = data.assignments.filter(a => a.dueDate === calSelected)
+    .sort((a,b) => (a.dueTime || '23:59').localeCompare(b.dueTime || '23:59'));
+  const aTasks = data.tasks.filter(t => t.date === calSelected).sort((a,b) => (a.time || '99').localeCompare(b.time || '99'));
+  h += '<div class="sec" style="margin-top:24px"><div class="sec-head"><h3>' + fmtDate(calSelected) + '</h3></div>';
+  if(!aAsg.length && !aTasks.length){
+    h += '<div class="card empty">Nothing on this day.<br><button class="btn btn-primary" onclick="openAssignmentSheet(null,\'' + calSelected + '\')">' + ic('plus',16) + ' Add assignment</button></div>';
+  } else {
+    h += '<div class="list">';
+    aAsg.forEach(a => {
+      const s = subjOf(a);
+      h += '<div class="card row' + (a.status === 'done' ? ' done' : '') + '">' +
+        '<button class="check' + (a.status === 'done' ? ' on' : '') + '" onclick="toggleDone(\'' + a.id + '\')">' + ic('check',15) + '</button>' +
+        '<span class="bar-v" style="background:' + (s ? s.color : 'var(--border)') + '"></span>' +
+        '<button class="body" style="text-align:left" onclick="openAssignmentSheet(\'' + a.id + '\')">' +
+          '<div class="t">' + esc(a.title) + '</div>' +
+          '<div class="m">' + (s ? esc(s.name) + ' · ' : '') + (a.dueTime ? '<span class="hot">' + fmtTime(a.dueTime) + '</span>' : STATUS_LBL[a.status]) + '</div>' +
+        '</button><span class="chip p-' + a.priority + '">' + a.priority.toUpperCase() + '</span></div>';
+    });
+    aTasks.forEach(t => { h += taskRow(t); });
+    h += '</div>';
+  }
+  h += '</div>';
+  return h;
+}
+function calMove(n){ calCursor = new Date(calCursor.getFullYear(), calCursor.getMonth() + n, 1); render(); }
+function calToday(){ calCursor = new Date(); calSelected = todayStr(); render(); }
+
+/* ---------- view: Subjects ---------- */
+function viewSubjects(){
+  let h = '<div class="subj-grid">';
+  data.subjects.forEach(s => {
+    const open = data.assignments.filter(a => a.subjectId === s.id && a.status !== 'done').length;
+    const late = data.assignments.filter(a => a.subjectId === s.id && a.status !== 'done' && dayDiff(a.dueDate) < 0).length;
+    h += '<button class="card subj-card" onclick="openSubjectSheet(\'' + s.id + '\')">' +
+      '<span class="sq" style="background:' + s.color + '22;color:' + s.color + '">' + ic('books', 20) + '</span>' +
+      '<div class="n">' + esc(s.name) + '</div>' +
+      (s.teacher ? '<div class="who">' + esc(s.teacher) + '</div>' : '') +
+      '<div class="cnt' + (late ? ' late' : '') + '">' + (late ? late + ' overdue · ' : '') + open + ' open</div></button>';
+  });
+  h += '<button class="card subj-add" onclick="openSubjectSheet(null)">' + ic('plus', 24) + 'Add subject</button>';
+  h += '</div>';
+  return h;
+}
+
+/* ---------- view: Profile ---------- */
+function viewProfile(){
+  const initial = me.name.trim()[0].toUpperCase() || 'S';
+  let h = '<div class="prof-head"><span class="avatar">' + initial + '</span>' +
+    '<h2>' + esc(me.name) + '</h2><p>' + esc(me.grade) + ' · ' + esc(me.email) + '</p></div>';
+  h += '<div class="card set-row"><div><div class="lbl">Appearance</div><div class="hint">Maroon &amp; beige by day, dark chocolate by night</div></div>' +
+    '<div class="seg" style="width:180px">' +
+      '<button class="' + (document.documentElement.dataset.theme === 'light' ? 'on' : '') + '" onclick="applyTheme(\'light\');render()">Light</button>' +
+      '<button class="' + (document.documentElement.dataset.theme === 'dark' ? 'on' : '') + '" onclick="applyTheme(\'dark\');render()">Dark</button>' +
+    '</div></div>';
+  h += '<div class="card set-row"><div><div class="lbl">Demo data</div><div class="hint">Reset subjects, assignments &amp; activities to the sample set</div></div>' +
+    '<button class="btn btn-ghost" onclick="resetDemo()">' + ic('rotate',16) + ' Reset</button></div>';
+  h += '<div class="card set-row"><div><div class="lbl">Account</div><div class="hint">Stored locally on this device only</div></div>' +
+    '<button class="btn btn-danger" onclick="logout()">' + ic('logout',16) + ' Log out</button></div>';
+  return h;
+}
+function resetDemo(){
+  if(SUPABASE_READY){
+    if(!confirm('Reset your data? This replaces your subjects, assignments & activities with the sample set.')) return;
+    // wipe current Supabase rows, then re-seed
+    (async () => {
+      for(const s of data.subjects) await api.deleteSubject(s.id);
+      for(const a of data.assignments) await api.deleteAssignment(a.id);
+      for(const t of data.tasks) await api.deleteTask(t.id);
+      await seedSupabase();
+      data = await api.loadAll();
+      render(); toast('Sample data restored');
+    })();
+    return;
+  }
+  if(!confirm('Reset all demo data? Your assignments & tasks will be replaced with the sample set.')) return;
+  data = seedData(); save(); render(); toast('Demo data reset');
+}
+
+/* ---------- mutations ---------- */
+/* Save to localStorage always; when Supabase is configured, also write through. */
+function persist(kind, rec){
+  save();
+  if(SUPABASE_READY && me){
+    if(kind === 'asg') api.saveAssignment(rec);
+    else if(kind === 'task') api.saveTask(rec);
+    else if(kind === 'subj') api.saveSubject(rec);
+  }
+}
+function toggleDone(id){
+  const a = data.assignments.find(x => x.id === id);
+  if(!a) return;
+  a.status = a.status === 'done' ? 'todo' : 'done';
+  persist('asg', a); render();
+}
+function toggleTask(id){
+  const t = data.tasks.find(x => x.id === id);
+  if(!t) return;
+  t.done = !t.done;
+  persist('task', t); render();
+}
+
+/* ---------- sheet ---------- */
+function openSheet(html){
+  $('#sheetBody').innerHTML = html;
+  $('#overlay').classList.add('on');
+  const first = $('#sheetBody input');
+  if(first) setTimeout(() => first.focus(), 60);
+}
+function closeSheet(){ $('#overlay').classList.remove('on'); }
+function toast(msg){
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('on');
+  clearTimeout(toast._h);
+  toast._h = setTimeout(() => t.classList.remove('on'), 2200);
+}
+
+/* ----- assignment sheet (create/edit) ----- */
+function openAssignmentSheet(id, presetDate){
+  const a = id ? data.assignments.find(x => x.id === id) : null;
+  const v = a || { title:'', subjectId:null, type:'homework', dueDate: presetDate || todayStr(), dueTime:'', status:'todo', priority:'medium' };
+  let h = '<h3>' + (a ? 'Edit assignment' : 'New assignment') + '</h3><form id="asgForm">';
+  h += '<div class="field"><label for="fTitle">Title</label><input class="input" id="fTitle" placeholder="Algebra hw — Ch. 7" value="' + esc(v.title) + '" required></div>';
+  h += '<div class="field"><label for="fSubj">Subject</label><select class="input" id="fSubj">' +
+    '<option value="">No subject</option>' +
+    data.subjects.map(s => '<option value="' + s.id + '"' + (v.subjectId === s.id ? ' selected' : '') + '>' + esc(s.name) + '</option>').join('') +
+    '</select></div>';
+  h += '<div style="display:flex;gap:12px"><div class="field" style="flex:1"><label for="fDate">Due date</label><input class="input" id="fDate" type="date" value="' + v.dueDate + '" required></div>' +
+    '<div class="field" style="flex:1"><label for="fTime">Time (optional)</label><input class="input" id="fTime" type="time" value="' + (v.dueTime || '') + '"></div></div>';
+  h += '<div class="field"><label>Type</label><div class="seg" id="fType">' +
+    TYPES.map(t => '<button type="button" class="' + (v.type === t ? 'on' : '') + '" data-v="' + t + '">' + t[0].toUpperCase() + t.slice(1) + '</button>').join('') + '</div></div>';
+  h += '<div class="field"><label>Priority</label><div class="seg" id="fPrio">' +
+    ['low','medium','high'].map(p => '<button type="button" class="' + (v.priority === p ? 'on' : '') + '" data-v="' + p + '">' + p[0].toUpperCase() + p.slice(1) + '</button>').join('') + '</div></div>';
+  if(a) h += '<div class="field"><label>Status</label><div class="seg" id="fStatus">' +
+    ['todo','in_progress','done'].map(s => '<button type="button" class="' + (v.status === s ? 'on' : '') + '" data-v="' + s + '">' + STATUS_LBL[s] + '</button>').join('') + '</div></div>';
+  h += '<div class="sheet-actions"><button class="btn btn-primary" type="submit">' + (a ? 'Save changes' : 'Add assignment') + '</button></div>';
+  if(a) h += '<div class="sheet-actions" style="margin-top:10px"><button class="btn btn-danger btn-block" type="button" onclick="deleteAssignment(\'' + a.id + '\')">' + ic('trash',16) + ' Delete</button></div>';
+  h += '</form>';
+  openSheet(h);
+  segWire('fType'); segWire('fPrio'); segWire('fStatus');
+  $('#asgForm').onsubmit = e => {
+    e.preventDefault();
+    const title = $('#fTitle').value.trim();
+    if(!title){ toast('Title is required'); return; }
+    const rec = {
+      title,
+      subjectId: $('#fSubj').value || null,
+      type: segVal('fType', 'homework'),
+      dueDate: $('#fDate').value || todayStr(),
+      dueTime: $('#fTime').value,
+      priority: segVal('fPrio', 'medium'),
+      status: a ? segVal('fStatus', a.status) : 'todo'
+    };
+    if(a) Object.assign(a, rec);
+    else data.assignments.push(Object.assign({ id: uid() }, rec));
+    persist('asg', a || data.assignments[data.assignments.length - 1]);
+    closeSheet(); render();
+    toast(a ? 'Assignment updated' : 'Assignment added');
+  };
+}
+function deleteAssignment(id){
+  if(!confirm('Delete this assignment?')) return;
+  data.assignments = data.assignments.filter(a => a.id !== id);
+  if(SUPABASE_READY) api.deleteAssignment(id);
+  save(); closeSheet(); render(); toast('Assignment deleted');
+}
+
+/* ----- task sheet ----- */
+function openTaskSheet(id){
+  const t = id ? data.tasks.find(x => x.id === id) : null;
+  const v = t || { title:'', date: todayStr(), time:'', kind:'personal', done:false };
+  let h = '<h3>' + (t ? 'Edit activity' : 'New activity') + '</h3><form id="taskForm">';
+  h += '<div class="field"><label for="fTTitle">Title</label><input class="input" id="fTTitle" placeholder="Gym at 5:30" value="' + esc(v.title) + '" required></div>';
+  h += '<div style="display:flex;gap:12px"><div class="field" style="flex:1"><label for="fTDate">Day</label><input class="input" id="fTDate" type="date" value="' + v.date + '" required></div>' +
+    '<div class="field" style="flex:1"><label for="fTTime">Time (optional)</label><input class="input" id="fTTime" type="time" value="' + (v.time || '') + '"></div></div>';
+  h += '<div class="field"><label>Kind</label><div class="seg" id="fTKind">' +
+    ['study','personal','activity'].map(k => '<button type="button" class="' + (v.kind === k ? 'on' : '') + '" data-v="' + k + '">' + k[0].toUpperCase() + k.slice(1) + '</button>').join('') + '</div></div>';
+  h += '<div class="sheet-actions"><button class="btn btn-primary" type="submit">' + (t ? 'Save changes' : 'Add activity') + '</button></div>';
+  if(t) h += '<div class="sheet-actions" style="margin-top:10px"><button class="btn btn-danger btn-block" type="button" onclick="deleteTask(\'' + t.id + '\')">' + ic('trash',16) + ' Delete</button></div>';
+  h += '</form>';
+  openSheet(h);
+  segWire('fTKind');
+  $('#taskForm').onsubmit = e => {
+    e.preventDefault();
+    const title = $('#fTTitle').value.trim();
+    if(!title){ toast('Title is required'); return; }
+    const rec = { title, date: $('#fTDate').value || todayStr(), time: $('#fTTime').value, kind: segVal('fTKind', 'personal') };
+    if(t) Object.assign(t, rec);
+    else data.tasks.push(Object.assign({ id: uid(), done:false }, rec));
+    persist('task', t || data.tasks[data.tasks.length - 1]);
+    closeSheet(); render();
+    toast(t ? 'Activity updated' : 'Activity added');
+  };
+}
+function deleteTask(id){
+  if(!confirm('Delete this activity?')) return;
+  data.tasks = data.tasks.filter(t => t.id !== id);
+  if(SUPABASE_READY) api.deleteTask(id);
+  save(); closeSheet(); render(); toast('Activity deleted');
+}
+
+/* ----- subject sheet ----- */
+function openSubjectSheet(id){
+  const s = id ? data.subjects.find(x => x.id === id) : null;
+  const v = s || { name:'', color: SUBJECT_COLORS[data.subjects.length % SUBJECT_COLORS.length], teacher:'' };
+  let h = '<h3>' + (s ? 'Edit subject' : 'New subject') + '</h3><form id="subjForm">';
+  h += '<div class="field"><label for="fSName">Name</label><input class="input" id="fSName" placeholder="Math" value="' + esc(v.name) + '" required></div>';
+  h += '<div class="field"><label for="fSWho">Teacher (optional)</label><input class="input" id="fSWho" placeholder="Ms. Rivera" value="' + esc(v.teacher || '') + '"></div>';
+  h += '<div class="field"><label>Color</label><div class="swatches" id="fSColor">' +
+    SUBJECT_COLORS.map(c => '<button type="button" class="swatch' + (v.color === c ? ' on' : '') + '" data-v="' + c + '" style="background:' + c + '" aria-label="Color ' + c + '"></button>').join('') +
+    '</div></div>';
+  h += '<div class="sheet-actions"><button class="btn btn-primary" type="submit">' + (s ? 'Save changes' : 'Add subject') + '</button></div>';
+  if(s) h += '<div class="sheet-actions" style="margin-top:10px"><button class="btn btn-danger btn-block" type="button" onclick="deleteSubject(\'' + s.id + '\')">' + ic('trash',16) + ' Delete</button></div>';
+  h += '<p class="demo-note" style="margin-top:14px">Deleting a subject keeps its assignments (they just lose the tag).</p></form>';
+  openSheet(h);
+  $('#fSColor').querySelectorAll('.swatch').forEach(b => b.onclick = () => {
+    $('#fSColor').querySelectorAll('.swatch').forEach(x => x.classList.remove('on'));
+    b.classList.add('on');
+  });
+  $('#subjForm').onsubmit = e => {
+    e.preventDefault();
+    const name = $('#fSName').value.trim();
+    if(!name){ toast('Name is required'); return; }
+    const rec = { name, teacher: $('#fSWho').value.trim(), color: ($('#fSColor').querySelector('.swatch.on') || {}).dataset.v || v.color };
+    if(s) Object.assign(s, rec);
+    else data.subjects.push(Object.assign({ id: uid() }, rec));
+    persist('subj', s || data.subjects[data.subjects.length - 1]);
+    closeSheet(); render();
+    toast(s ? 'Subject updated' : 'Subject added');
+  };
+}
+function deleteSubject(id){
+  if(!confirm('Delete this subject? Its assignments will be kept without a subject.')) return;
+  data.subjects = data.subjects.filter(s => s.id !== id);
+  data.assignments.forEach(a => { if(a.subjectId === id) a.subjectId = null; });
+  if(SUPABASE_READY){
+    api.deleteSubject(id);
+    // clear the subject tag on any assignments that referenced it
+    data.assignments.filter(a => a.subjectId === null).forEach(a => api.saveAssignment(a));
+  }
+  save(); closeSheet(); render(); toast('Subject deleted');
+}
+
+/* ---------- generic segmented control wiring ---------- */
+function segWire(id){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.querySelectorAll('button').forEach(b => b.onclick = () => {
+    el.querySelectorAll('button').forEach(x => x.classList.remove('on'));
+    b.classList.add('on');
+  });
+}
+function segVal(id, dflt){
+  const el = document.getElementById(id);
+  if(!el) return dflt;
+  const on = el.querySelector('button.on');
+  return on ? on.dataset.v : dflt;
+}
+
+/* ---------- boot ---------- */
+$('#authLogo').innerHTML = ic('cap', 30);
+$('#sideMark').innerHTML = ic('cap', 20);
+applyTheme(Store.get('sf_theme', 'light'));
+document.addEventListener('keydown', e => { if(e.key === 'Escape') closeSheet(); });
+
+/* update the auth footnote to reflect the active mode */
+(function(){
+  const note = document.querySelector('.demo-note');
+  if(note && SUPABASE_READY){
+    note.innerHTML = 'Connected to Supabase — your account &amp; data sync across devices.';
+  }
+})();
+
+(async function boot(){
+  if(SUPABASE_READY){
+    try{
+      const session = await api.getSession();
+      if(session && session.user){ await enterSupabase(session.user); return; }
+    }catch(e){ console.warn('session restore:', e.message); }
+    return; // show the auth screen
+  }
+  const sid = Store.get('sf_session', null);
+  const user = sid ? Store.get('sf_users', []).find(u => u.id === sid) : null;
+  if(user) startSession(user);
+})();
+</script>
+</body>
+</html>
